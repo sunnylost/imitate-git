@@ -1,13 +1,34 @@
 let fs = require('fs')
+let fse = require('fs-extra')
 let path = require('path')
+let zlib = require('zlib')
 
-exports.createObject = function createObject(path) {
-    console.log(__dirname)
-    try {
-        fs.mkdirSync(path)
-    } catch (e) {
-        console.log(e)
-    }
+exports.createObject = function createObject(git, id, content) {
+    let objectsPath = path.resolve(git.rootPath, './objects')
+    let dir = path.resolve(objectsPath, id.substring(0, 2))
+    let fileName = id.substring(2)
+
+    fse.ensureDirSync(dir)
+
+    zlib.deflate(content, (err, buffer) => {
+        if (!err) {
+            fse.outputFileSync(path.resolve(dir, fileName), buffer)
+        }
+    })
+}
+
+exports.getObject = function(git, id) {
+    let dir = id.substring(0, 2)
+    let name = id.substring(2)
+    let filePath = path.resolve(git.rootPath, 'objects', dir, name)
+
+    zlib.unzip(fs.readFileSync(filePath), (err, buffer) => {
+        if (!err) {
+            let content = buffer.toString()
+            let arr = content.split('\0')
+            console.log(arr[1])
+        }
+    })
 }
 
 /**

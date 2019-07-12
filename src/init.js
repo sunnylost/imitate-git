@@ -1,4 +1,6 @@
+let glob = require('glob')
 let util = require('./util')
+let path = require('path')
 
 let git = {
     commands: {},
@@ -9,10 +11,11 @@ let git = {
     }
 }
 
-let commands = ['hashObject', 'init']
+let commandsPath = path.resolve(__dirname, './commands/')
+let files = glob.sync(commandsPath + '/*.js')
 
-commands.forEach(v => {
-    let mod = require('./commands/' + v)
+files.forEach(v => {
+    let mod = require(v)
     git.register(mod)
 })
 
